@@ -60,11 +60,17 @@ function normalizeAvailability(json) {
       const row = avail[part] || avail[part.toUpperCase()] || avail[part.replace('/', '%2F')];
       if (!row) continue;
       const display = String(row.pickupDisplay || '').toLowerCase();
-      const status = display === 'available' ? 'available' :
-        display === 'unavailable' ? 'unavailable' : 'unknown';
-      if (status !== 'unknown') meaningful++;
       const quote = [row.pickupSearchQuote, row.pickupDisplayQuote,
         row.messageTypes?.regular?.storePickupQuote].find(v => typeof v === 'string' && v.trim()) || '';
+      // During iPhone Duo pre-launch, Apple's 8-part query returns
+      // pickupDisplay: "default" with "請於 10 月 23 日查看供應狀況。".
+      // This is NOT "unavailable": inventory has not yet been published.
+      // Only treat "default" as awaiting when the official quote explicitly says so.
+      const waitingForRelease = display === 'default' && /請於[\s\S]*?(查看|查詢)[\s\S]*?(供應|供貨|庫存)/.test(quote);
+      const status = display === 'available' ? 'available' :
+        display === 'unavailable' ? 'unavailable' :
+        waitingForRelease ? 'awaiting' : 'unknown';
+      if (status !== 'unknown') meaningful++;
       target.inventory[part] = { status, quote, rawStatus: display };
     }
   }
@@ -123,7 +129,7 @@ async function handle(req, res) {
     catch (e) { return send(res, 503, {ok:false, error:e.message || '官方查詢失敗', checkedAt: new Date().toISOString()}); }
   }
   if (u.pathname === '/api/config') return send(res, 200, { parts: PARTS, stores:STORE_LIST, minRefreshSeconds:60 });
-  if (u.pathname === '/health') return send(res, 200, {ok:true, version:'1.1', service:'iPhone Duo Pickup Radar'});
+  if (u.pathname === '/health') return send(res, 200, {ok:true, version:'1.2', service:'iPhone Duo Pickup Radar'});
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, {error:'Method not allowed'});
   let file = u.pathname === '/' ? 'index.html' : u.pathname.slice(1);
   if (!['index.html','style.css','app.js','favicon.svg'].includes(file)) {

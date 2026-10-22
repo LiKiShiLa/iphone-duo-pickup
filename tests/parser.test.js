@@ -76,3 +76,31 @@ test('server can parse the current API response end-to-end',async()=>{
   assert.equal([...calledUrl.searchParams.keys()].filter(k=>k.startsWith('parts.')).length,8);
  } finally {global.fetch=originalFetch;}
 });
+
+// Actual Apple TW 2026-10-22 eight-part response: "default" + release-day quote.
+test('pre-release Apple default is awaiting, never out-of-stock or an API failure',()=>{
+ const prelaunch = {head:{status:'200'},body:{stores:['R713','R694'].map(storeNumber=>({
+  storeNumber, partsAvailability:Object.fromEntries(Object.values(PARTS).map(part=>[
+   part, {pickupDisplay:'default',pickupSearchQuote:'請於 10\u00a0月 23\u00a0日查看供應狀況。'}
+  ]))
+ }))}};
+ const result=normalizeAvailability(prelaunch);
+ assert.equal(result.ok,true);
+ for(const store of result.stores){
+  for(const p of Object.values(PARTS)){
+   assert.equal(store.inventory[p].status,'awaiting');
+   assert.match(store.inventory[p].quote,/10/);
+  }
+ }
+});
+test('default without explicit release quote remains unknown',()=>{
+ assert.throws(()=>normalizeAvailability({body:{stores:[
+  {storeNumber:'R713',partsAvailability:{'MK2D4ZP/A':{pickupDisplay:'default',pickupSearchQuote:'目前狀態未明'}}}
+ ]}}),/未提供可辨識/);
+});
+test('available after opening overrides previously awaiting state',()=>{
+ const result=normalizeAvailability({body:{stores:[
+  {storeNumber:'R713',partsAvailability:{'MK2D4ZP/A':{pickupDisplay:'available',pickupSearchQuote:'今日可取貨'}}}
+ ]}});
+ assert.equal(result.stores[0].inventory['MK2D4ZP/A'].status,'available');
+});

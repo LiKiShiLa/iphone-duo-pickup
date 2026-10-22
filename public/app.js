@@ -15,7 +15,7 @@ let activeCap='all', activeColor='all', lastResult=null, queryError=null;
 let requestInProgress=false, nextDue=0, loop=null, firstSuccess=false, previousAvailability=null;
 const localKey='iphone-duo-radar-v1';
 const BUY_URL='https://www.apple.com/tw/shop/buy-iphone/iphone-duo';
-const statusNames = {available:'可取貨',unavailable:'暫無庫存',unknown:'無法確認',pending:'尚未查詢'};
+const statusNames = {available:'可取貨',unavailable:'暫無庫存',unknown:'無法確認',awaiting:'尚未開放查詢',pending:'尚未查詢'};
 
 function restore(){try{const s=JSON.parse(localStorage.getItem(localKey)||'{}');activeCap=s.cap||'all';activeColor=s.color||'all';el('#autoRefresh').checked=s.auto!==false;el('#interval').value=['60','120','180','300'].includes(String(s.interval))?String(s.interval):'120';el('#notify').checked=!!s.notify;}catch{}}
 function persist(){try{localStorage.setItem(localKey,JSON.stringify({cap:activeCap,color:activeColor,auto:el('#autoRefresh').checked,interval:el('#interval').value,notify:el('#notify').checked}));}catch{}}
@@ -30,26 +30,28 @@ function inventoryAt(id,part){return lastResult?.stores?.find(x=>x.id===id)?.inv
 function render(){
   for(const store of STORE_IDS){
     const box=document.querySelector(`[data-store="${store}"]`);box.textContent='';
-    let has=0,missing=0;
+    let has=0,missing=0,awaiting=0;
     for(const v of selection()){
       const info=inventoryAt(store,v.part),state=info.status||'unknown';
-      if(state==='available')has++;else if(state==='unavailable')missing++;
+      if(state==='available')has++;else if(state==='unavailable')missing++;else if(state==='awaiting')awaiting++;
       const row=create('div','sku-row');row.append(create('div','phone-disc '+v.color));
       const details=create('div','sku-text');details.append(create('div','sku-name',`${v.capacity} · ${v.colorName}`),create('div','sku-part',v.part));row.append(details);
       const stateCell=create('div','sku-state');stateCell.append(create('span','pill '+state,statusNames[state]||statusNames.unknown));
       if(state==='available') {const a=create('a','sku-buy','立即前往 ↗');a.href=BUY_URL;a.target='_blank';a.rel='noopener noreferrer';stateCell.append(a);}
-      if(info.quote && state==='available')stateCell.append(create('div','availability-quote',info.quote));
+      if(info.quote && (state==='available'||state==='awaiting'))stateCell.append(create('div','availability-quote',info.quote));
       row.append(stateCell);box.append(row);
     }
     const tag=el(`#store-${store} .store-status`);
     if(!lastResult){tag.textContent=queryError?'查詢失敗':'尚未查詢';tag.className='store-status unknown';}
     else if(has){tag.textContent=`${has} 款可取`;tag.className='store-status available';}
     else if(missing===selection().length){tag.textContent='目前缺貨';tag.className='store-status unavailable';}
+    else if(awaiting===selection().length){tag.textContent='尚未開放查詢';tag.className='store-status awaiting';}
     else{tag.textContent='部分未知';tag.className='store-status unknown';}
   }
   const n=selection().length;el('#watchCount').innerHTML=`${n*2} <span>組</span>`;
   const amount=lastResult? STORE_IDS.reduce((num,id)=> num+selection().filter(v=>inventoryAt(id,v.part).status==='available').length,0):null;
-  el('#availableCount').textContent=amount===null?'—':String(amount).padStart(2,'0');
+  const known=lastResult?STORE_IDS.some(id=>selection().some(v=>['available','unavailable'].includes(inventoryAt(id,v.part).status))):false;
+  el('#availableCount').textContent=!known?'—':String(amount).padStart(2,'0');
   if(lastResult){el('#lastUpdate').textContent=`最後取得資料：${prettyDate(new Date(lastResult.checkedAt))}`;}
   for(const [g, key, value] of [['#capacities','cap',activeCap],['#colors','color',activeColor]]){
     document.querySelectorAll(`${g} button`).forEach(b=>{const on=b.dataset[key]===value;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});
@@ -71,8 +73,21 @@ async function check(){
   if(requestInProgress)return;requestInProgress=true;el('#refreshButton').disabled=true;el('#refreshIcon').classList.add('spinning');setTop('','正在查詢 Apple…');
   try{const r=await fetch('/api/check',{cache:'no-store'});const data=await r.json();if(!r.ok||!data.ok)throw new Error(data.error||`查詢失敗 (${r.status})`);
     queryError=null;scanRestock(data);lastResult=data;firstSuccess=true;
-    const all=collectAvailable(data).size;setNotice(all?`官方回傳 ${all} 組可供門市取貨！請儘快前往 Apple 官網完成訂購，庫存可能隨時變動。`:'已取得 Apple 取貨資料。頁面顯示的是最近一次查詢結果；下單前請再次於 Apple 官網確認。',all?'success':'');
-    setTop('ok','官方查詢成功');
+    const all=collectAvailable(data).size;
+    const statuses=data.stores.flatMap(s=>Object.values(s.inventory||{}).map(v=>v.status));
+    const awaiting=statuses.filter(v=>v==='awaiting').length;
+    const known=statuses.filter(v=>v==='available'||v==='unavailable').length;
+    const upcomingQuote=data.stores.flatMap(s=>Object.values(s.inventory||{})).find(v=>v.status==='awaiting'&&v.quote)?.quote;
+    if(all){
+      setNotice(`官方回傳 ${all} 組可供門市取貨！請儘快前往 Apple 官網完成訂購，庫存可能隨時變動。`,'success');
+      setTop('ok','官方查詢成功');
+    }else if(awaiting && !known){
+      setNotice(`Apple 目前尚未公布可供確認的門市取貨狀態。${upcomingQuote||'請待 Apple 官方開放查詢。'} 網站會照設定繼續更新；此狀態不代表缺貨。`,'');
+      setTop('','等待 Apple 開放查詢');
+    }else{
+      setNotice('已取得 Apple 取貨資料。未公布的規格不代表缺貨；下單前請再次於 Apple 官網確認。','');
+      setTop('ok','官方查詢成功');
+    }
   }catch(e){queryError=e.message;lastResult=null;setNotice(`目前無法判斷庫存：${e.message}。請透過上方「Apple 官網」查詢，不能將此結果視為缺貨。`,'error');setTop('error','官方查詢失敗');}
   finally{requestInProgress=false;el('#refreshButton').disabled=false;el('#refreshIcon').classList.remove('spinning');nextDue=Date.now()+Number(el('#interval').value)*1000;render();updateCountdown();}
 }

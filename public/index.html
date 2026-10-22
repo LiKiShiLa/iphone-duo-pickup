@@ -22,7 +22,7 @@
     <section class="stats" aria-label="監控概況">
       <div class="stat"><div class="stat-label">可取貨規格</div><div class="stat-value" id="availableCount">—</div><div class="stat-hint">兩家直營店合計</div></div>
       <div class="stat"><div class="stat-label">正在監控</div><div class="stat-value" id="watchCount">16 <span>組</span></div><div class="stat-hint">8 種規格 × 2 間門市</div></div>
-      <div class="stat"><div class="stat-label">下次更新</div><div class="stat-value" id="nextCheck">—</div><div class="stat-hint">查詢成功時會顯示</div></div>
+      <div class="stat"><div class="stat-label">下次更新</div><div class="stat-value" id="nextCheck">—</div><div class="stat-hint">自動更新時會倒數</div></div>
     </section>
     <section class="control-panel">
       <div class="panel-heading"><div><span class="kicker">01 / 追蹤條件</span><h2>找到你要的規格</h2></div><div class="mini-note">所有規格已內建台灣商品料號</div></div>
@@ -34,7 +34,7 @@
       </div>
     </section>
     <section class="inventory-section">
-      <div class="panel-heading inventory-head"><div><span class="kicker">02 / 門市庫存</span><h2>Apple 直營店取貨狀態 <span class="live-icon">AUTO</span></h2></div><div class="legend"><span><i class="dot green"></i>可取貨</span><span><i class="dot gray"></i>暫無庫存</span><span><i class="dot amber"></i>無法確認</span></div></div>
+      <div class="panel-heading inventory-head"><div><span class="kicker">02 / 門市庫存</span><h2>Apple 直營店取貨狀態 <span class="live-icon">AUTO</span></h2></div><div class="legend"><span><i class="dot green"></i>可取貨</span><span><i class="dot gray"></i>暫無庫存</span><span><i class="dot amber"></i>待開放／無法確認</span></div></div>
       <div id="notice" class="notice" role="status"><span class="notice-icon">ⓘ</span><span id="noticeText">點擊「立即查詢庫存」取得 Apple 官方資料。查詢前不會顯示假庫存。</span></div>
       <div class="store-grid" id="storeGrid">
         <div class="store-card" id="store-taipei101"><div class="store-head"><div class="store-icon">⌖</div><div><div class="store-overline">APPLE STORE · TAIPEI</div><h3>台北 101</h3><div class="address">信義區市府路 45 號 · 台北 101 1F</div></div><span class="store-status unknown">尚未查詢</span></div><div class="sku-list" data-store="taipei101"></div><a class="store-link" href="https://www.apple.com/tw/retail/taipei101/" target="_blank" rel="noopener noreferrer">查看直營店資訊 <span>↗</span></a></div>
@@ -42,7 +42,7 @@
       </div>
     </section>
     <section class="guide"><div class="guide-symbol">✦</div><div><h3>查到有貨，下一步？</h3><p>請立即前往 Apple 官網，選定對應容量、顏色與取貨門市完成訂購。可取貨狀態不代表已替你保留，實際仍以 Apple 結帳頁面為準。</p></div><a href="https://www.apple.com/tw/shop/buy-iphone/iphone-duo" target="_blank" rel="noopener noreferrer" class="outline guide-button">前往 Apple 選購 ↗</a></section>
-    <footer><div>DUORADAR v1.1 <span>·</span> 非 Apple 官方網站</div><p>庫存資料來自 Apple 台灣購物網站的未公開取貨查詢介面，並非保證即時或保證有貨。介面可能變更、限制或拒絕自動查詢；無法查詢時會顯示「無法確認」。查詢採用 45 秒伺服器快取。</p><div class="footlinks"><a href="https://www.apple.com/tw/shop/buy-iphone/iphone-duo" target="_blank" rel="noopener noreferrer">Apple iPhone Duo</a><a href="https://www.apple.com/tw/retail/storelist/" target="_blank" rel="noopener noreferrer">官方門市列表</a></div></footer>
+    <footer><div>DUORADAR v1.2 <span>·</span> 非 Apple 官方網站</div><p>庫存資料來自 Apple 台灣購物網站的未公開取貨查詢介面，並非保證即時或保證有貨。介面可能變更、限制或拒絕自動查詢；無法查詢時會顯示「無法確認」。查詢採用 45 秒伺服器快取。</p><div class="footlinks"><a href="https://www.apple.com/tw/shop/buy-iphone/iphone-duo" target="_blank" rel="noopener noreferrer">Apple iPhone Duo</a><a href="https://www.apple.com/tw/retail/storelist/" target="_blank" rel="noopener noreferrer">官方門市列表</a></div></footer>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="/app.js" defer></script>

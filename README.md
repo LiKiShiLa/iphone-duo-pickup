@@ -1,6 +1,6 @@
-# iPhone Duo 取貨雷達 — GitHub + Render 部署版（v1.1.1）
+# iPhone Duo 取貨雷達 — GitHub + Render 部署版（v1.2.0）
 
-這是原版 v1.1 的網站，新增 GitHub 與 Render 部署設定。Node.js 20+、不需要第三方 npm 套件。前端與 API 都由同一個 Node.js 網站提供，不用另外設定 GitHub Pages。
+這是 v1.2 版，修正 Apple 於 2026/10/22 回傳 `pickupDisplay: "default"`（官方提示 10/23 才能查看庫存）的情況，不再誤當查詢錯誤或缺貨。Node.js 20+、不需要第三方 npm 套件。前端與 API 都由同一個 Node.js 網站提供，不用另外設定 GitHub Pages。
 
 ## 1. 上傳 GitHub
 
@@ -42,3 +42,13 @@ npm start
 ```
 
 打開 http://localhost:3000 ，或取得 `GET /health` 確認執行。
+
+## v1.2 更新（已有 GitHub + Render 網站）
+
+1. 上傳這份更新檔案到現有 GitHub repository 的根目錄（不要再建立新的 Repository）。
+2. GitHub 上的 `server.js`、`public/app.js`、`public/style.css`、`public/index.html`、`tests/parser.test.js`、`package.json` 需要更新；其餘維持不變即可。
+3. 上傳後按 **Commit changes**，Render 若已開啟 Auto-Deploy，通常會自動發布新版本。
+4. 在 Render 確認新的 Deploy 狀態為 **Live**，重新整理網站，頁尾應顯示 `DUORADAR v1.2`。
+5. 開啟 `/api/check`：若 Apple 仍回覆預售狀態，會顯示 `ok: true` 和 `status: "awaiting"`。這代表已成功讀到官方提醒，但 **不代表有貨或缺貨**。
+
+注意：無法從本環境直接連線到 Render 執行中的伺服器做端對端實測。這次修正以 Apple 官方回應的實際欄位為依據，並用模擬回應驗證。
