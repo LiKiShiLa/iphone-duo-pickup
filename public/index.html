@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0b11"><meta name="description" content="追蹤台灣 Apple 直營店 iPhone Duo 取貨庫存，支援全容量顏色、門市即時狀態與到貨通知。">
+  <title>iPhone Duo 取貨雷達 · 台灣 Apple Store 庫存追蹤</title>
+  <link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <header class="topbar wrap">
+    <a class="brand" href="/" aria-label="iPhone Duo 取貨雷達首頁"><span class="brandmark"><span class="ring"></span><span class="ring ring-2"></span></span><span>DUO<span class="brand-light">RADAR</span></span></a>
+    <div class="topright"><span class="quiet"><span id="statusDot" class="statusdot"></span><span id="statusLabel">尚未連線</span></span><a class="outline small" href="https://www.apple.com/tw/shop/buy-iphone/iphone-duo" target="_blank" rel="noopener noreferrer">Apple 官網 <span class="arrow">↗</span></a></div>
+  </header>
+  <main class="wrap">
+    <div class="hero">
+      <div class="eyebrow"><span class="eyebrow-bar"></span> APPLE TAIWAN · STORE PICKUP MONITOR</div>
+      <h1>你想要的 iPhone Duo，<br><span class="gradient-text">一到貨就知道。</span></h1>
+      <p class="hero-sub">追蹤台北 101、信義 A13 直營店取貨狀態。一次看完所有容量與顏色，不用一直重整蘋果官網。</p>
+      <div class="hero-buttons"><button class="primary" id="refreshButton"><span id="refreshIcon" class="refresh-icon">↻</span> 立即查詢庫存</button><span id="lastUpdate" class="muted update-label">尚未取得官方庫存資料</span></div>
+    </div>
+    <section class="stats" aria-label="監控概況">
+      <div class="stat"><div class="stat-label">可取貨規格</div><div class="stat-value" id="availableCount">—</div><div class="stat-hint">兩家直營店合計</div></div>
+      <div class="stat"><div class="stat-label">正在監控</div><div class="stat-value" id="watchCount">16 <span>組</span></div><div class="stat-hint">8 種規格 × 2 間門市</div></div>
+      <div class="stat"><div class="stat-label">下次更新</div><div class="stat-value" id="nextCheck">—</div><div class="stat-hint">查詢成功時會顯示</div></div>
+    </section>
+    <section class="control-panel">
+      <div class="panel-heading"><div><span class="kicker">01 / 追蹤條件</span><h2>找到你要的規格</h2></div><div class="mini-note">所有規格已內建台灣商品料號</div></div>
+      <div class="filters">
+        <div class="filter-group"><label class="filter-label">儲存容量</label><div id="capacities" class="chips" aria-label="容量篩選"><button class="chip selected" data-cap="all">全部容量</button><button class="chip" data-cap="256">256GB</button><button class="chip" data-cap="512">512GB</button><button class="chip" data-cap="1tb">1TB</button><button class="chip" data-cap="2tb">2TB</button></div></div>
+        <div class="filter-group"><label class="filter-label">機身顏色</label><div id="colors" class="chips"><button class="chip selected" data-color="all">全部顏色</button><button class="chip" data-color="white"><span class="swatch white"></span>星光白色</button><button class="chip" data-color="black"><span class="swatch black"></span>夜空色</button></div></div>
+        <div class="filter-group"><label for="interval" class="filter-label">自動更新</label><div class="settings-row"><label class="toggle-wrap"><input id="autoRefresh" type="checkbox" checked><span class="toggle"></span><span id="autoLabel">已開啟</span></label><select id="interval" aria-label="查詢間隔"><option value="60">每 1 分鐘</option><option value="120" selected>每 2 分鐘</option><option value="180">每 3 分鐘</option><option value="300">每 5 分鐘</option></select></div></div>
+        <div class="filter-group"><label class="filter-label">到貨通知</label><div class="settings-row"><label class="toggle-wrap"><input id="notify" type="checkbox"><span class="toggle"></span><span id="notifyLabel">未開啟</span></label><button id="testSound" class="text-button">測試提醒音 ↗</button></div><div class="filter-footnote">瀏覽器通知需允許權限，且網頁保持開啟</div></div>
+      </div>
+    </section>
+    <section class="inventory-section">
+      <div class="panel-heading inventory-head"><div><span class="kicker">02 / 門市庫存</span><h2>Apple 直營店取貨狀態 <span class="live-icon">AUTO</span></h2></div><div class="legend"><span><i class="dot green"></i>可取貨</span><span><i class="dot gray"></i>暫無庫存</span><span><i class="dot amber"></i>無法確認</span></div></div>
+      <div id="notice" class="notice" role="status"><span class="notice-icon">ⓘ</span><span id="noticeText">點擊「立即查詢庫存」取得 Apple 官方資料。查詢前不會顯示假庫存。</span></div>
+      <div class="store-grid" id="storeGrid">
+        <div class="store-card" id="store-taipei101"><div class="store-head"><div class="store-icon">⌖</div><div><div class="store-overline">APPLE STORE · TAIPEI</div><h3>台北 101</h3><div class="address">信義區市府路 45 號 · 台北 101 1F</div></div><span class="store-status unknown">尚未查詢</span></div><div class="sku-list" data-store="taipei101"></div><a class="store-link" href="https://www.apple.com/tw/retail/taipei101/" target="_blank" rel="noopener noreferrer">查看直營店資訊 <span>↗</span></a></div>
+        <div class="store-card" id="store-xinyia13"><div class="store-head"><div class="store-icon">⌖</div><div><div class="store-overline">APPLE STORE · TAIPEI</div><h3>信義 A13</h3><div class="address">信義區松壽路 13 號</div></div><span class="store-status unknown">尚未查詢</span></div><div class="sku-list" data-store="xinyia13"></div><a class="store-link" href="https://www.apple.com/tw/retail/xinyia13/" target="_blank" rel="noopener noreferrer">查看直營店資訊 <span>↗</span></a></div>
+      </div>
+    </section>
+    <section class="guide"><div class="guide-symbol">✦</div><div><h3>查到有貨，下一步？</h3><p>請立即前往 Apple 官網，選定對應容量、顏色與取貨門市完成訂購。可取貨狀態不代表已替你保留，實際仍以 Apple 結帳頁面為準。</p></div><a href="https://www.apple.com/tw/shop/buy-iphone/iphone-duo" target="_blank" rel="noopener noreferrer" class="outline guide-button">前往 Apple 選購 ↗</a></section>
+    <footer><div>DUORADAR v1.1 <span>·</span> 非 Apple 官方網站</div><p>庫存資料來自 Apple 台灣購物網站的未公開取貨查詢介面，並非保證即時或保證有貨。介面可能變更、限制或拒絕自動查詢；無法查詢時會顯示「無法確認」。查詢採用 45 秒伺服器快取。</p><div class="footlinks"><a href="https://www.apple.com/tw/shop/buy-iphone/iphone-duo" target="_blank" rel="noopener noreferrer">Apple iPhone Duo</a><a href="https://www.apple.com/tw/retail/storelist/" target="_blank" rel="noopener noreferrer">官方門市列表</a></div></footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body></html>
